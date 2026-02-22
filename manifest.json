@@ -1,0 +1,6 @@
+{
+  "name": "Fix MathJax in Cloze",
+  "package": "fix_mathjax_in_cloze",
+  "dependencies": [],
+  "mod": 1
+}
