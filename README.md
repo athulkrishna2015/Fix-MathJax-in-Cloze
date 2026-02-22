@@ -1,30 +1,51 @@
+
 # Fix MathJax in Cloze
 
-An Anki add-on that fixes MathJax rendering issues inside cloze deletions by rewriting problematic `}}` sequences inside cloze content.
+An Anki add-on that fixes cloze conflicts where `}}` inside MathJax (or other cloze text) is interpreted as the end of a cloze deletion.
 
-## What it fixes
+## Cloze Conflict Background
 
-Example transformation:
+Cloze deletions are terminated with `}}`. If `}}` appears inside cloze content, Anki may close the cloze too early.
 
-- From:
-
-```text
-The general depolarization field is expressed as{{c2::\(\vec{E}_{\text{dep}} = -\frac{N\vec{P}}{\varepsilon_0}\)}},, where the symbol \(N\) represents...
-```
-
-- To:
+- Problematic:
 
 ```text
-The general depolarization field is expressed as {{c2::\(\vec{E}_{\text{dep}\ } = -\frac{N\vec{P}\ }{\varepsilon_0}\)}}, where the symbol \(N\) represents...
+{{c1::[$]\frac{foo}{\frac{bar}{baz}}[/$] blah blah blah.}}
 ```
 
-This prevents accidental early cloze termination when `}}` appears inside MathJax content.
+- Works (space workaround):
+
+```text
+{{c1::[$]\frac{foo}{\frac{bar}{baz} }[/$] blah blah blah.}}
+```
+
+LaTeX math mode ignores extra spaces, so rendering remains the same.
+
+Alternative workaround (for cases where visible spaces matter):
+
+```text
+{{c1::[$]\frac{foo}{\frac{bar}{baz}<!-- -->}[/$] blah blah blah.}}
+```
+
+The same idea also helps when `::` needs to appear in cloze-deleted text, e.g.:
+
+```text
+{{c1::std:<!-- -->:variant::~type~}} in C++ is a {{c2::type-safe union}}
+```
+
+## What this add-on does
+
+This add-on applies the **space workaround by default**:
+
+- Replaces internal `}}` inside cloze answer text with `} }`
+- Leaves the actual cloze terminator untouched
+- Supports cloze hints like `{{c1::answer::hint}}`
 
 ## Features
 
 - Bulk fix from **Card Browser** on selected notes
 - Single-note fix from **Review screen** context menu
-- Safe cloze parsing (supports cloze hints like `{{c1::answer::hint}}`)
+- Safe cloze parsing with nesting awareness
 - Configurable replacement token via `config.json`
 
 ## Usage
@@ -48,12 +69,12 @@ This prevents accidental early cloze termination when `}}` appears inside MathJa
 
 ```json
 {
-  "replacement": "}\\ }"
+  "replacement": "} }"
 }
 ```
 
 - `replacement`: string used to replace internal `}}` inside cloze answers.
-- Default is `}\ ` (as represented in JSON: `"}\\ "`).
+- Default is `} }` (space workaround).
 
 ## Files
 
@@ -63,5 +84,5 @@ This prevents accidental early cloze termination when `}}` appears inside MathJa
 
 ## Notes
 
-- The add-on only rewrites `}}` found **inside cloze answer text**.
+- The add-on rewrites only `}}` found **inside cloze answer text**.
 - Malformed cloze text is left unchanged for safety.
