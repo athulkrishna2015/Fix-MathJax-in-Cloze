@@ -10,7 +10,7 @@ CLOZE_START_RE = re.compile(r"\{\{c\d+::", re.IGNORECASE)
 
 def _replacement_token() -> str:
     config = mw.addonManager.getConfig(__name__) or {}
-    return config.get("replacement", "}\\ }")
+    return config.get("replacement", "} }")
 
 
 def _fix_internal_double_close(answer: str) -> tuple[str, int]:
@@ -22,7 +22,7 @@ def _fix_internal_double_close(answer: str) -> tuple[str, int]:
 
 def fix_mathjax_in_clozes(text: str) -> tuple[str, int]:
     """
-    Rewrites each cloze answer so internal `}}` sequences become `}\\ }`.
+    Rewrites each cloze answer so internal `}}` sequences become `} }`.
     This avoids accidental cloze termination with MathJax brace-heavy content.
     Returns (rewritten_text, number_of_replacements).
     """
@@ -132,7 +132,7 @@ def on_browser_fix(browser) -> None:
     mw.reset()
 
     if changed_notes == 0:
-        tooltip("No cloze MathJax conflicts found.")
+        tooltip("No cloze conflicts found.")
     else:
         tooltip(f"Updated {changed_notes} notes ({replacements} replacements).")
 
@@ -148,7 +148,7 @@ def on_reviewer_fix(reviewer) -> None:
     changed, replacements = _fix_note(note)
 
     if not changed:
-        tooltip("No cloze MathJax conflicts found in this note.")
+        tooltip("No cloze conflicts found in this note.")
         return
 
     mw.reset()
