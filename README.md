@@ -37,8 +37,8 @@ The same idea also helps when `::` needs to appear in cloze-deleted text, e.g.:
 
 This add-on applies the **space workaround by default**:
 
-- Replaces internal `}}` inside cloze answer text with `} }`
-- Leaves the actual cloze terminator untouched
+- Replaces internal `}}` inside cloze content (answer and hint) with `} }`
+- Also handles trailing `}}}` patterns by rewriting to `} }}` style output
 - Supports cloze hints like `{{c1::answer::hint}}`
 
 ## Features
@@ -73,8 +73,10 @@ This add-on applies the **space workaround by default**:
 }
 ```
 
-- `replacement`: string used to replace internal `}}` inside cloze answers.
+- `replacement`: string used to replace internal `}}` inside cloze content.
 - Default is `} }` (space workaround).
+- If `replacement` is invalid (empty, non-string, or contains `}}`), the add-on
+  falls back to `} }` for safety.
 
 ## Files
 
@@ -84,5 +86,19 @@ This add-on applies the **space workaround by default**:
 
 ## Notes
 
-- The add-on rewrites only `}}` found **inside cloze answer text**.
-- Malformed cloze text is left unchanged for safety.
+- The add-on rewrites `}}` found inside cloze content and at the immediate
+  boundary before cloze termination (to avoid accidental early closure).
+- Malformed cloze starts are left unchanged, and parsing continues so later
+  valid clozes in the same field can still be fixed.
+
+## Changelog
+
+### 2026-02-25
+
+- Added handling for trailing `}}}` cloze-boundary conflicts (for example,
+  `{{c1::\\mathbf{0}}}` -> `{{c1::\\mathbf{0} }}`).
+- Confirmed behavior applies to cloze content inside and outside MathJax.
+- Added internal `}}` replacement in cloze hints (not just cloze answers).
+- Added safety fallback for invalid custom `replacement` values.
+- Changed malformed-cloze handling to continue scanning later clozes.
+- Updated documentation to describe boundary rewrite behavior.

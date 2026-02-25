@@ -6,11 +6,28 @@ from aqt.qt import QAction
 from aqt.utils import tooltip
 
 CLOZE_START_RE = re.compile(r"\{\{c\d+::", re.IGNORECASE)
+DEFAULT_REPLACEMENT = "} }"
 
 
 def _replacement_token() -> str:
     config = mw.addonManager.getConfig(__name__) or {}
-    return config.get("replacement", "} }")
+    replacement = config.get("replacement", DEFAULT_REPLACEMENT)
+    if not isinstance(replacement, str):
+        return DEFAULT_REPLACEMENT
+    if not replacement or "}}" in replacement:
+        return DEFAULT_REPLACEMENT
+    return replacement
+
+
+def _boundary_replacement_token() -> str:
+    """
+    Boundary rewrite needs a token that ends with `}` so cloze closing `}}`
+    remains intact after replacement.
+    """
+    replacement = _replacement_token()
+    if replacement.endswith("}"):
+        return replacement
+    return DEFAULT_REPLACEMENT
 
 
 def _fix_internal_double_close(answer: str) -> tuple[str, int]:
@@ -20,9 +37,22 @@ def _fix_internal_double_close(answer: str) -> tuple[str, int]:
     return answer.replace("}}", _replacement_token()), count
 
 
+def _fix_trailing_close_before_terminator(segment: str) -> tuple[str, str, int]:
+    """
+    Rewrites a trailing `}` right before cloze closure.
+    This handles content like `...}}}` where the first two braces may be parsed
+    as cloze end; we replace that boundary `}}` with the configured token.
+    Returns (rewritten_segment, cloze_terminator_to_append, replacements_count).
+    """
+    if not segment.endswith("}"):
+        return segment, "}}", 0
+    return segment[:-1] + _boundary_replacement_token(), "}", 1
+
+
 def fix_mathjax_in_clozes(text: str) -> tuple[str, int]:
     """
     Rewrites each cloze answer so internal `}}` sequences become `} }`.
+    Also rewrites the `}` + `}}` boundary case into `} }}` style output.
     This avoids accidental cloze termination with MathJax brace-heavy content.
     Returns (rewritten_text, number_of_replacements).
     """
@@ -69,17 +99,33 @@ def fix_mathjax_in_clozes(text: str) -> tuple[str, int]:
             i += 1
 
         if not closed:
-            # Malformed cloze: keep remainder unchanged.
-            result.append(text[match.start():])
-            break
+            # Malformed cloze start: keep it unchanged and continue searching.
+            result.append(text[match.start():match.end()])
+            cursor = match.end()
+            continue
 
         fixed_answer, replaced = _fix_internal_double_close("".join(answer_chars))
         replacements += replaced
+        fixed_hint = "".join(hint_chars)
+        if in_hint:
+            fixed_hint, hint_replaced = _fix_internal_double_close(fixed_hint)
+            replacements += hint_replaced
+        cloze_terminator = "}}"
+
+        if in_hint:
+            fixed_hint, cloze_terminator, boundary_replaced = _fix_trailing_close_before_terminator(
+                fixed_hint
+            )
+        else:
+            fixed_answer, cloze_terminator, boundary_replaced = _fix_trailing_close_before_terminator(
+                fixed_answer
+            )
+        replacements += boundary_replaced
 
         rebuilt = [match.group(0), fixed_answer]
         if in_hint:
-            rebuilt.extend(["::", "".join(hint_chars)])
-        rebuilt.append("}}")
+            rebuilt.extend(["::", fixed_hint])
+        rebuilt.append(cloze_terminator)
 
         result.append("".join(rebuilt))
         cursor = i
