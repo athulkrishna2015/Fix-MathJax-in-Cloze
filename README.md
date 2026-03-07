@@ -63,6 +63,11 @@ This add-on applies the **space workaround by default**:
 2. Click **Fix MathJax in This Note**.
 3. The current note is updated immediately.
 
+<img width="2083" height="1188" alt="Screenshot_20260307_232051" src="https://github.com/user-attachments/assets/5852640e-4bcf-4dab-ad47-58b95345969e" />
+<img width="2083" height="1188" alt="Screenshot_20260307_232059" src="https://github.com/user-attachments/assets/7f0d622d-c714-4c73-888a-c8a875b9b21a" />
+
+
+
 ## Configuration
 
 `config.json`:
