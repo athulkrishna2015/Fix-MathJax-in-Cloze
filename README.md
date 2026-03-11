@@ -68,6 +68,10 @@ This add-on applies the **space workaround by default**:
 2. Click **Fix MathJax in This Note**.
 3. The current note is updated immediately.
 
+<img width="2083" height="1188" alt="Screenshot_20260307_232051" src="https://github.com/user-attachments/assets/5852640e-4bcf-4dab-ad47-58b95345969e" />
+<img width="2083" height="1188" alt="Screenshot_20260307_232059" src="https://github.com/user-attachments/assets/7f0d622d-c714-4c73-888a-c8a875b9b21a" />
+
+
 ## Configuration
 
 Open **Tools -> Add-ons -> Fix MathJax in Cloze -> Config**.
@@ -124,5 +128,3 @@ Open **Tools -> Add-ons -> Fix MathJax in Cloze -> Config**.
   `{{c3::\\(\\sin i_{{{c1::c}}} = ...\\)}}` so the add-on preserves
   `{{c1::c}}` and rewrites the outer brace boundary instead.
 - Added a regression test for the nested-cloze brace case.
-- Added a custom config dialog with a support page that shows large QR codes
-  for UPI, BTC, and ETH and provides copy buttons for each payment target.
