@@ -39,6 +39,8 @@ This add-on applies the **space workaround by default**:
 
 - Replaces internal `}}` inside cloze content (answer and hint) with `} }`
 - Also handles trailing `}}}` patterns by rewriting to `} }}` style output
+- Preserves nested cloze terminators like `{{{c1::c}}}` and rewrites the
+  adjacent outer brace boundary instead
 - Supports cloze hints like `{{c1::answer::hint}}`
 
 ## Features
@@ -46,6 +48,9 @@ This add-on applies the **space workaround by default**:
 - Bulk fix from **Card Browser** on selected notes
 - Single-note fix from **Review screen** context menu
 - Safe cloze parsing with nesting awareness
+- Custom add-on config dialog with a **Settings** tab and **Support** tab
+- Scrollable support page with large QR codes for UPI, BTC, and ETH
+- Copy buttons for UPI ID and wallet addresses
 - Configurable replacement token via `config.json`
 
 ## Usage
@@ -63,12 +68,14 @@ This add-on applies the **space workaround by default**:
 2. Click **Fix MathJax in This Note**.
 3. The current note is updated immediately.
 
-<img width="2083" height="1188" alt="Screenshot_20260307_232051" src="https://github.com/user-attachments/assets/5852640e-4bcf-4dab-ad47-58b95345969e" />
-<img width="2083" height="1188" alt="Screenshot_20260307_232059" src="https://github.com/user-attachments/assets/7f0d622d-c714-4c73-888a-c8a875b9b21a" />
-
-
-
 ## Configuration
+
+Open **Tools -> Add-ons -> Fix MathJax in Cloze -> Config**.
+
+- `Settings` tab: update the replacement token used for internal `}}`
+  rewrites.
+- `Support` tab: view large QR codes for UPI, BTC, and ETH in a scrollable
+  list, with copy buttons for each payment ID/address.
 
 `config.json`:
 
@@ -88,6 +95,7 @@ This add-on applies the **space workaround by default**:
 - `__init__.py` - Add-on logic, parser, and UI hooks
 - `manifest.json` - Add-on metadata
 - `config.json` - User-configurable replacement token
+- `Support/` - QR codes used in the support tab
 
 ## Notes
 
@@ -107,3 +115,14 @@ This add-on applies the **space workaround by default**:
 - Added safety fallback for invalid custom `replacement` values.
 - Changed malformed-cloze handling to continue scanning later clozes.
 - Updated documentation to describe boundary rewrite behavior.
+
+### 2026-03-11
+
+- Refactored cloze parsing into reusable helpers for clearer nested-cloze
+  handling.
+- Fixed nested cloze cases like
+  `{{c3::\\(\\sin i_{{{c1::c}}} = ...\\)}}` so the add-on preserves
+  `{{c1::c}}` and rewrites the outer brace boundary instead.
+- Added a regression test for the nested-cloze brace case.
+- Added a custom config dialog with a support page that shows large QR codes
+  for UPI, BTC, and ETH and provides copy buttons for each payment target.

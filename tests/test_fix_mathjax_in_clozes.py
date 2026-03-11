@@ -22,6 +22,12 @@ def load_addon_module(config: dict | None = None):
         def getConfig(self, _name):
             return self._cfg
 
+        def setConfigAction(self, _name, _callback):
+            return None
+
+        def writeConfig(self, _name, cfg):
+            self._cfg = cfg
+
     qt.QAction = DummyAction
     utils.tooltip = lambda *_args, **_kwargs: None
     gui_hooks.browser_menus_did_init = []
@@ -73,6 +79,20 @@ class FixMathJaxInClozeTests(unittest.TestCase):
         self.assertEqual(
             rewritten,
             r"{{c1::{broken text {{c2::[$]\frac{foo}{\frac{bar}{baz} }[/$]}}",
+        )
+        self.assertEqual(count, 1)
+
+    def test_preserves_nested_cloze_terminator_and_rewrites_outer_brace_boundary(self):
+        mod = load_addon_module()
+        text = (
+            r"Formula: {{c3::\(\sin i_{{{c1::c}}} = \frac{n_2}{n_1}\), "
+            r"\(n_1>n_2\)}}"
+        )
+        rewritten, count = mod.fix_mathjax_in_clozes(text)
+        self.assertEqual(
+            rewritten,
+            r"Formula: {{c3::\(\sin i_{{{c1::c}} } = \frac{n_2}{n_1}\), "
+            r"\(n_1>n_2\)}}",
         )
         self.assertEqual(count, 1)
 
