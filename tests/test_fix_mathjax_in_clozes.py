@@ -1,4 +1,4 @@
-import importlib.util
+import importlib
 import sys
 import types
 import unittest
@@ -10,6 +10,7 @@ def load_addon_module(config: dict | None = None):
     qt = types.ModuleType("aqt.qt")
     utils = types.ModuleType("aqt.utils")
     gui_hooks = types.ModuleType("aqt.gui_hooks")
+    webview = types.ModuleType("aqt.webview")
 
     class DummyAction:
         def __init__(self, *args, **kwargs):
@@ -28,22 +29,41 @@ def load_addon_module(config: dict | None = None):
         def writeConfig(self, _name, cfg):
             self._cfg = cfg
 
+    class DummyWebView:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def setFixedHeight(self, *args):
+            pass
+
+        def setHtml(self, *args):
+            pass
+
     qt.QAction = DummyAction
     utils.tooltip = lambda *_args, **_kwargs: None
     gui_hooks.browser_menus_did_init = []
+    gui_hooks.browser_will_show_context_menu = []
     gui_hooks.reviewer_will_show_context_menu = []
+    webview.AnkiWebView = DummyWebView
     aqt.mw = types.SimpleNamespace(addonManager=DummyAddonManager(config or {}))
 
     sys.modules["aqt"] = aqt
     sys.modules["aqt.qt"] = qt
     sys.modules["aqt.utils"] = utils
     sys.modules["aqt.gui_hooks"] = gui_hooks
+    sys.modules["aqt.webview"] = webview
 
-    module_path = Path(__file__).resolve().parents[1] / "__init__.py"
-    spec = importlib.util.spec_from_file_location("addon_module_under_test", module_path)
-    module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
-    spec.loader.exec_module(module)
+    # Remove any previously cached addon submodules so reimport picks up fresh mocks.
+    for key in list(sys.modules.keys()):
+        if key == "addon" or key.startswith("addon."):
+            del sys.modules[key]
+
+    # Add the addon's parent directory to sys.path so 'addon' is importable as a package.
+    addon_parent = str(Path(__file__).resolve().parents[1])
+    if addon_parent not in sys.path:
+        sys.path.insert(0, addon_parent)
+
+    module = importlib.import_module("addon")
     return module
 
 
