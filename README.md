@@ -120,6 +120,10 @@ If this add-on helps, you can support it from the in-app Support tab or here:
 - Fixed nested cloze cases like `{{c3::\(\sin i_{{{c1::c}}} = ...\)}}` so the add-on preserves `{{c1::c}}` and rewrites the outer brace boundary instead
 - Added a regression test for the nested-cloze brace case
 
+### 2026-03-07
+
+- Added screenshots to README for visual guidance
+
 ### 2026-02-25
 
 - Added handling for trailing `}}}` cloze-boundary conflicts (for example, `{{c1::\\mathbf{0}}}` → `{{c1::\\mathbf{0} }}`)
