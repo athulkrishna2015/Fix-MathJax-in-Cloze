@@ -116,23 +116,26 @@ If this add-on helps, you can support it from the in-app Support tab or here:
 
 ### 2026-03-11
 
-- Added screenshots to README for visual guidance
-- Internal packaging updates
+- Refactored cloze parsing into reusable helpers for clearer nested-cloze handling
+- Fixed nested cloze cases like `{{c3::\(\sin i_{{{c1::c}}} = ...\)}}` so the add-on preserves `{{c1::c}}` and rewrites the outer brace boundary instead
+- Added a regression test for the nested-cloze brace case
 
 ### 2026-02-25
 
-- Internal packaging updates
+- Added handling for trailing `}}}` cloze-boundary conflicts (for example, `{{c1::\\mathbf{0}}}` → `{{c1::\\mathbf{0} }}`)
+- Confirmed behavior applies to cloze content inside and outside MathJax
+- Added internal `}}` replacement in cloze hints (not just cloze answers)
+- Added safety fallback for invalid custom `replacement` values
+- Changed malformed-cloze handling to continue scanning later clozes
+- Updated documentation to describe boundary rewrite behavior
 
 ### 2026-02-22
-
-- Fixed replacement string formatting in `config.json`
-- Fixed formatting issues in cloze handling functions
-- Improved README with cloze conflict background and examples
-
-### 2026-02-22 (Initial release)
 
 - Initial release
 - Core cloze rewriting engine (`}}` → `} }`)
 - Browser menu action for bulk-fixing selected notes
 - Reviewer right-click menu action for fixing current note
+- Fixed replacement string formatting in `config.json`
+- Fixed formatting issues in cloze handling functions
+- Improved README with cloze conflict background and examples
 
