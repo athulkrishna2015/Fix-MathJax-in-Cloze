@@ -1,7 +1,25 @@
+import re
 from .config import CLOZE_START_RE, ParsedCloze, RewriteTokens, rewrite_tokens
 
 
+MATHJAX_RE = re.compile(r"(?s)(\\\(.*?\\\)|\\\[.*?\\\]|<anki-mathjax[^>]*>.*?</anki-mathjax>)")
+
+def remove_nbsp_from_mathjax(text: str) -> tuple[str, int]:
+    replacements = 0
+
+    def repl(match: re.Match) -> str:
+        nonlocal replacements
+        original = match.group(0)
+        fixed = original.replace("&nbsp;", " ").replace("\xa0", " ").replace("&amp;nbsp;", " ")
+        if fixed != original:
+            replacements += original.count("&nbsp;") + original.count("\xa0") + original.count("&amp;nbsp;")
+        return fixed
+
+    new_text = MATHJAX_RE.sub(repl, text)
+    return new_text, replacements
+
 class ClozeRewriter:
+
     def __init__(self, tokens: RewriteTokens) -> None:
         self._replacement = tokens.replacement
         self._boundary_replacement = tokens.boundary_replacement

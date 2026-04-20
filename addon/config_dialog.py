@@ -7,6 +7,7 @@ from .support_ui import build_support_tab
 
 def show_config_dialog() -> None:
     from aqt.qt import (
+        QCheckBox,
         QDialog,
         QDialogButtonBox,
         QFormLayout,
@@ -31,11 +32,18 @@ def show_config_dialog() -> None:
     settings_form = QFormLayout()
     replacement_input = QLineEdit(addon_config().get("replacement", replacement_token()))
     settings_form.addRow("Replacement token", replacement_input)
+    
+    nbsp_checkbox = QCheckBox("Remove non-breaking spaces (&nbsp;) inside MathJax")
+    nbsp_checkbox.setChecked(addon_config().get("remove_nbsp_in_mathjax", True))
+    settings_form.addRow(nbsp_checkbox)
+    
     settings_layout.addLayout(settings_form)
 
     help_text = QLabel(
-        "Used when rewriting unsafe `}}` inside cloze text. "
-        "The value must be non-empty and cannot contain `}}`."
+        "Replacement token is used when rewriting unsafe `}}` inside cloze text. "
+        "The value must be non-empty and cannot contain `}}`.\n\n"
+        "Removing non-breaking spaces (&nbsp;) solves rendering issues inside MathJax "
+        "created by typing multiple spaces or after pasting code."
     )
     help_text.setWordWrap(True)
     settings_layout.addWidget(help_text)
@@ -61,6 +69,7 @@ def show_config_dialog() -> None:
 
         config = addon_config()
         config["replacement"] = replacement
+        config["remove_nbsp_in_mathjax"] = nbsp_checkbox.isChecked()
         mw.addonManager.writeConfig(__name__, config)
         dialog.accept()
         tooltip("Configuration saved.")

@@ -46,3 +46,7 @@ def rewrite_tokens() -> RewriteTokens:
         replacement=replacement,
         boundary_replacement=boundary_replacement,
     )
+
+
+def remove_nbsp_in_mathjax() -> bool:
+    return bool(addon_config().get("remove_nbsp_in_mathjax", True))

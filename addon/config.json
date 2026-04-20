@@ -1,3 +1,4 @@
 {
-  "replacement": "} }"
+  "replacement": "} }",
+  "remove_nbsp_in_mathjax": true
 }

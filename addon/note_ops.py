@@ -1,16 +1,23 @@
 from aqt import mw
 from aqt.utils import tooltip
 
-from .cloze_rewriter import fix_mathjax_in_clozes
+from .cloze_rewriter import fix_mathjax_in_clozes, remove_nbsp_from_mathjax
+from .config import remove_nbsp_in_mathjax
 
 
 def _fix_note(note) -> tuple[bool, int]:
     changed = False
     replacements = 0
+    remove_nbsp = remove_nbsp_in_mathjax()
 
     for field_name in note.keys():
         original = note[field_name]
         rewritten, count = fix_mathjax_in_clozes(original)
+
+        if remove_nbsp:
+            rewritten, nbsp_count = remove_nbsp_from_mathjax(rewritten)
+            count += nbsp_count
+
         if count > 0:
             note[field_name] = rewritten
             replacements += count
